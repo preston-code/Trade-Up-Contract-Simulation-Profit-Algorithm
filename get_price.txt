@@ -1,94 +1,265 @@
-import re
 import requests
-
-url = 'https://counterstrike.fandom.com/wiki/Skins/List'
-r = requests.get(url)
-text = r.text
-length=854
-#print(text)
+import re
+import array as arr
+import time
+from datetime import date
 
 
-#Find wear in order of csFandom
-x=0
-GradeCheck = re.findall(r'n>\n</td><td><span class="\w+">(.+?)<''|''"\d"><span class="\w+">(.+?)<',text)
-Grade = [*range(0,length,1)]
-for s in GradeCheck:
-    ss=str(s)
-    Grade[x]=re.search(r"\w+",ss).group(0)
-    if Grade[x]=='x':
-        x=x-1
-    x+=1
+url = "https://csgostash.com/case/"
+urlS = "https://csgostash.com/skin/"
 
-#Find skins in order of csFandom
-x=0
-skinCheck = re.findall(r'a>\n</td><td><span class="\w+">(.+?)<',text)
-Skin = [*range(0,length,1)]
-for s in skinCheck:
-    Skin[x]=s
-    SkinS = re.search("\w+\s?\w+\s?\w+\s?",Skin[x])
-    Skin[x] = str(SkinS.group(0))
-    x+=1
+collection = ["Assault", "Aztec", "Baggage", "Bank", "Cache", "Canals", "Cobblestone", "Dust", "Dust_II", "Inferno", "Italy",
+        "Lake", "Militia", "Mirage", "Nuke", "Office", "Overpass", "Safehouse", "Train", "Vertigo", "Inferno", "Nuke",
+        "Blacksite", "Chop_Shop_Collection", "Gods_and_Monsters_Collection", "Rising_Sun_Collection",
+        "Alpha_Collection", "Norse_Collection", "St_Marc_Collection"]
 
-#Find cases in order of csFandom
-x = 0
-CaseCheck = re.findall(r'r>\n<td><a href="/wiki/(.+?)"',text)
-Case = [*range(0, length, 1)]
-for s in CaseCheck:
-    Case[x] = s
-    CaseS = re.search("\w+",Case[x])
-    Case[x] = str(CaseS.group(0))
-    x += 1
+case = ["CSGO_Weapon_Case", "ESports_2013_Case", "Operation_Bravo_Case",
+        "CSGO_Weapon_Case_2", "Winter_Offensive_Weapon_Case", "ESports_2013_Winter_Case", "CSGO_Weapon_Case_3",
+        "Operation_Phoenix_Weapon_Case", "Huntsman_Weapon_Case", "Operation_Breakout_Weapon_Case",
+        "ESports_2014_Summer_Case", "Operation_Vanguard_Weapon_Case", "Chroma_Case", "Chroma_2_Case",
+        "Falchion_Case", "Shadow_Case", "Revolver_Case", "Operation_Wildfire_Case", "Chroma_3_Case",
+        "Gamma_Case", "Gamma_2_Case", "Glove_Case", "Spectrum_Case", "Operation_Hydra_Case", "Spectrum_2_Case",
+        "Clutch_Case", "Horizon_Case", "Danger_Zone_Case", "Prisma_Case", "CS20_Case", "Shattered_Weh_Case"]
 
-#Find Gun in order of csFandom
-x = 0
-GunCheck = re.findall(r'a>\n</td><td><a href="/wiki/(.+?)"',text)
-Gun = [*range(0, length, 1)]
-for s in GunCheck:
-    Gun[x] = s
-    x += 1
+caseN = ['1','2','3','4','7','5','10','11','17','18','19','29','38','48','50','80','111','112','141','144','172','179',
+         '207','208','220','238','244','259','274','293','277']
 
-#find FN price in order of csFandom
-priceFile = open("Price.txt", 'r')
-read = priceFile.read()
-priceFile.close()
-Price = [*range(0, length, 1)]
-for i in range(0,length):
-    if re.search(Gun[i] + ' - ' + Skin[i] + ' - Factory New    = \$(.+?)\n',read):
-        PriceS=re.search(Gun[i] + ' - ' + Skin[i] + ' - Factory New    = \$(.+?)\n',read)
-        Price[i]=PriceS.group(1)
-    else:
-        Price[i]='N/A'
+skinUrls = [[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],
+            [*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],
+            [*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],
+            [*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],
+            [*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],
+            [*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],[*range(0, 25, 1)],
+            [*range(0, 25, 1)]]
+
+stFN = [[*range(0, 9, 1)],[*range(0, 9, 1)],[*range(0, 15, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],
+            [*range(0, 12, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],[*range(0, 21, 1)],[*range(0, 14, 1)],
+            [*range(0, 17, 1)],[*range(0, 14, 1)],[*range(0, 14, 1)],[*range(0, 15, 1)],[*range(0, 16, 1)],
+            [*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)]]
+
+stMW = [[*range(0, 9, 1)],[*range(0, 9, 1)],[*range(0, 15, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],
+            [*range(0, 12, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],[*range(0, 21, 1)],[*range(0, 14, 1)],
+            [*range(0, 17, 1)],[*range(0, 14, 1)],[*range(0, 14, 1)],[*range(0, 15, 1)],[*range(0, 16, 1)],
+            [*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)]]
+
+stFT = [[*range(0, 9, 1)],[*range(0, 9, 1)],[*range(0, 15, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],
+            [*range(0, 12, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],[*range(0, 21, 1)],[*range(0, 14, 1)],
+            [*range(0, 17, 1)],[*range(0, 14, 1)],[*range(0, 14, 1)],[*range(0, 15, 1)],[*range(0, 16, 1)],
+            [*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)]]
+
+stWW = [[*range(0, 9, 1)],[*range(0, 9, 1)],[*range(0, 15, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],
+            [*range(0, 12, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],[*range(0, 21, 1)],[*range(0, 14, 1)],
+            [*range(0, 17, 1)],[*range(0, 14, 1)],[*range(0, 14, 1)],[*range(0, 15, 1)],[*range(0, 16, 1)],
+            [*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)]]
+
+stBS = [[*range(0, 9, 1)],[*range(0, 9, 1)],[*range(0, 15, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],
+            [*range(0, 12, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],[*range(0, 21, 1)],[*range(0, 14, 1)],
+            [*range(0, 17, 1)],[*range(0, 14, 1)],[*range(0, 14, 1)],[*range(0, 15, 1)],[*range(0, 16, 1)],
+            [*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)]]
+
+FN = [[*range(0, 9, 1)],[*range(0, 9, 1)],[*range(0, 15, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],
+            [*range(0, 12, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],[*range(0, 21, 1)],[*range(0, 14, 1)],
+            [*range(0, 17, 1)],[*range(0, 14, 1)],[*range(0, 14, 1)],[*range(0, 15, 1)],[*range(0, 16, 1)],
+            [*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)]]
+
+MW = [[*range(0, 9, 1)],[*range(0, 9, 1)],[*range(0, 15, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],
+            [*range(0, 12, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],[*range(0, 21, 1)],[*range(0, 14, 1)],
+            [*range(0, 17, 1)],[*range(0, 14, 1)],[*range(0, 14, 1)],[*range(0, 15, 1)],[*range(0, 16, 1)],
+            [*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)]]
+
+FT = [[*range(0, 9, 1)],[*range(0, 9, 1)],[*range(0, 15, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],
+            [*range(0, 12, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],[*range(0, 21, 1)],[*range(0, 14, 1)],
+            [*range(0, 17, 1)],[*range(0, 14, 1)],[*range(0, 14, 1)],[*range(0, 15, 1)],[*range(0, 16, 1)],
+            [*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)]]
+
+WW = [[*range(0, 9, 1)],[*range(0, 9, 1)],[*range(0, 15, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],
+            [*range(0, 12, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],[*range(0, 21, 1)],[*range(0, 14, 1)],
+            [*range(0, 17, 1)],[*range(0, 14, 1)],[*range(0, 14, 1)],[*range(0, 15, 1)],[*range(0, 16, 1)],
+            [*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)]]
+
+BS = [[*range(0, 9, 1)],[*range(0, 9, 1)],[*range(0, 15, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],
+            [*range(0, 12, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],[*range(0, 21, 1)],[*range(0, 14, 1)],
+            [*range(0, 17, 1)],[*range(0, 14, 1)],[*range(0, 14, 1)],[*range(0, 15, 1)],[*range(0, 16, 1)],
+            [*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)]]
+
+Grade = [[*range(0, 9, 1)],[*range(0, 9, 1)],[*range(0, 15, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],
+            [*range(0, 12, 1)],[*range(0, 12, 1)],[*range(0, 13, 1)],[*range(0, 21, 1)],[*range(0, 14, 1)],
+            [*range(0, 17, 1)],[*range(0, 14, 1)],[*range(0, 14, 1)],[*range(0, 15, 1)],[*range(0, 16, 1)],
+            [*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 16, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],[*range(0, 17, 1)],
+            [*range(0, 17, 1)]]
+
+today = date.today()
+todayM=str(today.strftime("%b %d,%Y"))
+prevMatch = ""
+
+def writeFile(x,y):
+    prevSkins=0
+    priceFile = open("csPrice.txt","r")
+    list = priceFile.readlines()
+    priceFile.close()
+    if (x>0):
+        for i in range(0,x):
+            prevSkin=len(FN[i])*10
+            prevSkins+=prevSkin
+    if (x==0):
+        prevSkins=0
+    list[0]="All CSGO Skin Prices for " + todayM + '\n'
+    list[prevSkins + (y*10) + 3] = case[x] + skinUrls[x][y] + "stFN$"+ str(stFN[x][y])+'\n'
+    list[prevSkins + (y*10) + 4] = case[x] + skinUrls[x][y] +"stMW$"+ str(stMW[x][y])+'\n'
+    list[prevSkins + (y*10) + 5] = case[x] + skinUrls[x][y] +"stFT$"+ str(stFT[x][y])+'\n'
+    list[prevSkins + (y*10) + 6] = case[x] + skinUrls[x][y] +"stWW$"+ str(stWW[x][y])+'\n'
+    list[prevSkins + (y*10) + 7] = case[x] + skinUrls[x][y] +"stBS$"+ str(stBS[x][y])+'\n'
+    list[prevSkins + (y*10) + 8] = case[x] + skinUrls[x][y] +"FN$"+ str(FN[x][y])+'\n'
+    list[prevSkins + (y*10) + 9] = case[x] + skinUrls[x][y] +"MW$"+ str(MW[x][y])+'\n'
+    list[prevSkins + (y*10) + 10] = case[x] + skinUrls[x][y] +"FT$"+ str(FT[x][y])+'\n'
+    list[prevSkins + (y*10) + 11] = case[x] + skinUrls[x][y] +"WW$"+ str(WW[x][y])+'\n'
+    list[prevSkins + (y*10) + 12] = case[x] + skinUrls[x][y] +"BS$"+ str(BS[x][y])+'\n'
+
+    priceFile = open("csPrice.txt","w")
+    newCont="".join(list)
+    priceFile.write(newCont)
+    priceFile.close()
+
+    pFile = open("csPrice.txt", "r")
+    read = pFile.readlines()
 
 
 
 
+urlNumber=0
+for x in range(0,len(caseN)):
+        urlN = url + caseN[x]
+        r = requests.get(urlN)
+        text = r.text
+        pattern = re.compile(r'https://csgostash.com/skin/(.+?)"')
+        matches = pattern.finditer(text)
+        y=0
+        for match in matches:
+                if match.group(1) != prevMatch:
+                        prevMatch = match.group(1)
+                        skinUrls[x][y]=str(prevMatch)
+                        gunUrl = urlS + skinUrls[x][y]
+                        urlNumber += 1
+                        print("\rChecking url", urlNumber , "/ 476...",end='')
+                        r = requests.get(gunUrl)
+                        text = r.text
+                        if re.search('StatTrak</span>\n<span class="pull-left">Factory New</span>\n<span class="pull-right">\$(.+?)<',text):
+                                stFN[x][y] = re.search('StatTrak</span>\n<span class="pull-left">Factory New</span>\n<span class="pull-right">\$(.+?)<',text).group(1)
+                        else:
+                                stFN[x][y] = "N/A"
 
-CaseSkinGradeGunPrice = [[*range(0, length, 1)],
-                         [*range(0, length, 1)],
-                         [*range(0, length, 1)],
-                         [*range(0, length, 1)],
-                         [*range(0, length, 1)]]
+                        if re.search('StatTrak</span>\n<span class="pull-left">Minimal Wear</span>\n<span class="pull-right">\$(.+?)<',text):
+                                stMW[x][y] = re.search('StatTrak</span>\n<span class="pull-left">Minimal Wear</span>\n<span class="pull-right">\$(.+?)<',text).group(1)
+                        else:
+                                stMW[x][y] = "N/A"
 
-for z in range(0,len(Case)):
-    CaseSkinGradeGunPrice[0][z]=Case[z]
-    CaseSkinGradeGunPrice[1][z]=Skin[z]
-    CaseSkinGradeGunPrice[2][z]=Grade[z]
-    CaseSkinGradeGunPrice[3][z]=Gun[z]
-    CaseSkinGradeGunPrice[4][z]=Price[z]
+                        if re.search('StatTrak</span>\n<span class="pull-left">Field-Tested</span>\n<span class="pull-right">\$(.+?)<',text):
+                                stFT[x][y] = re.search('StatTrak</span>\n<span class="pull-left">Field-Tested</span>\n<span class="pull-right">\$(.+?)<',text).group(1)
+                        else:
+                                stFT[x][y] = "N/A"
 
+                        if re.search('StatTrak</span>\n<span class="pull-left">Well-Worn</span>\n<span class="pull-right">\$(.+?)<',text):
+                                stWW[x][y] = re.search('StatTrak</span>\n<span class="pull-left">Well-Worn</span>\n<span class="pull-right">\$(.+?)<',text).group(1)
+                        else:
+                                stWW[x][y] = "N/A"
 
-
-
-
-
-
-
-
+                        if re.search('StatTrak</span>\n<span class="pull-left">Battle-Scarred</span>\n<span class="pull-right">\$(.+?)<',text):
+                                stBS[x][y] = re.search('StatTrak</span>\n<span class="pull-left">Battle-Scarred</span>\n<span class="pull-right">\$(.+?)<',text).group(1)
+                        else:
+                                stBS[x][y] = "N/A"
 
 
+                        if re.search('">\n<span class="pull-left">Factory New</span>\n<span class="pull-right">\$(.+?)<',text):
+                                FN[x][y] = re.search('">\n<span class="pull-left">Factory New</span>\n<span class="pull-right">\$(.+?)<',text).group(1)
+                        else:
+                                FN[x][y] = "N/A"
+
+                        if re.search('">\n<span class="pull-left">Minimal Wear</span>\n<span class="pull-right">\$(.+?)<',text):
+                                MW[x][y] = re.search('">\n<span class="pull-left">Minimal Wear</span>\n<span class="pull-right">\$(.+?)<',text).group(1)
+                        else:
+                                MW[x][y] = "N/A"
+
+                        if re.search('">\n<span class="pull-left">Field-Tested</span>\n<span class="pull-right">\$(.+?)<',text):
+                                FT[x][y] = re.search('">\n<span class="pull-left">Field-Tested</span>\n<span class="pull-right">\$(.+?)<',text).group(1)
+                        else:
+                                FT[x][y] = "N/A"
+
+                        if re.search('">\n<span class="pull-left">Well-Worn</span>\n<span class="pull-right">\$(.+?)<',text):
+                                WW[x][y] = re.search('">\n<span class="pull-left">Well-Worn</span>\n<span class="pull-right">\$(.+?)<',text).group(1)
+                        else:
+                                WW[x][y] = "N/A"
+
+                        if re.search('">\n<span class="pull-left">Battle-Scarred</span>\n<span class="pull-right">\$(.+?)<',text):
+                                BS[x][y] = re.search('">\n<span class="pull-left">Battle-Scarred</span>\n<span class="pull-right">\$(.+?)<',text).group(1)
+                        else:
+                                BS[x][y] = "N/A"
+                        Grade[x][y]=re.search('csgostash.com/skin-rarity/(.+?)"',text).group(1)
+                        #writeFile(x,y)
+                        y += 1
+                        
+
+print('\nDone!\n',)
+print('FN=',FN)
+print('MW=',MW)
+print('FT=',FT)
+print('WW=',WW)
+print('BS=',BS)
+print('stFN=',stFN)
+print('stMW=',stMW)
+print('stFT=',stFT)
+print('stWW=',stWW)
+print('stBS=',stBS)
+print(Grade)
 
 
 
+aVal =     [[*range(0, 4, 1)],[*range(0, 4, 1)],[*range(0, 4, 1)],[*range(0, 4, 1)],[*range(0, 4, 1)],
+            [*range(0, 4, 1)],[*range(0, 4, 1)],[*range(0, 4, 1)],[*range(0, 4, 1)],[*range(0, 4, 1)],
+            [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)],
+            [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)],
+            [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)],
+            [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)], [*range(0, 4, 1)],
+            [*range(0, 4, 1)]]
 
+for x in range(0,len(case)):
+    aVal[x][0] = 0
+    aVal[x][1] = 0
+    aVal[x][2] = 0
+    aVal[x][3] = 0
+    for y in range(0,len(FN[x])):
+        if Grade[x][y] == "Covert":
+            aVal[x][0]=FN[x][y]+aVal[x][0]
 
 
