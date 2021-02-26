@@ -1,0 +1,94 @@
+import re
+import requests
+
+url = 'https://counterstrike.fandom.com/wiki/Skins/List'
+r = requests.get(url)
+text = r.text
+length=854
+#print(text)
+
+
+#Find wear in order of csFandom
+x=0
+GradeCheck = re.findall(r'n>\n</td><td><span class="\w+">(.+?)<''|''"\d"><span class="\w+">(.+?)<',text)
+Grade = [*range(0,length,1)]
+for s in GradeCheck:
+    ss=str(s)
+    Grade[x]=re.search(r"\w+",ss).group(0)
+    if Grade[x]=='x':
+        x=x-1
+    x+=1
+
+#Find skins in order of csFandom
+x=0
+skinCheck = re.findall(r'a>\n</td><td><span class="\w+">(.+?)<',text)
+Skin = [*range(0,length,1)]
+for s in skinCheck:
+    Skin[x]=s
+    SkinS = re.search("\w+\s?\w+\s?\w+\s?",Skin[x])
+    Skin[x] = str(SkinS.group(0))
+    x+=1
+
+#Find cases in order of csFandom
+x = 0
+CaseCheck = re.findall(r'r>\n<td><a href="/wiki/(.+?)"',text)
+Case = [*range(0, length, 1)]
+for s in CaseCheck:
+    Case[x] = s
+    CaseS = re.search("\w+",Case[x])
+    Case[x] = str(CaseS.group(0))
+    x += 1
+
+#Find Gun in order of csFandom
+x = 0
+GunCheck = re.findall(r'a>\n</td><td><a href="/wiki/(.+?)"',text)
+Gun = [*range(0, length, 1)]
+for s in GunCheck:
+    Gun[x] = s
+    x += 1
+
+#find FN price in order of csFandom
+priceFile = open("Price.txt", 'r')
+read = priceFile.read()
+priceFile.close()
+Price = [*range(0, length, 1)]
+for i in range(0,length):
+    if re.search(Gun[i] + ' - ' + Skin[i] + ' - Factory New    = \$(.+?)\n',read):
+        PriceS=re.search(Gun[i] + ' - ' + Skin[i] + ' - Factory New    = \$(.+?)\n',read)
+        Price[i]=PriceS.group(1)
+    else:
+        Price[i]='N/A'
+
+
+
+
+
+CaseSkinGradeGunPrice = [[*range(0, length, 1)],
+                         [*range(0, length, 1)],
+                         [*range(0, length, 1)],
+                         [*range(0, length, 1)],
+                         [*range(0, length, 1)]]
+
+for z in range(0,len(Case)):
+    CaseSkinGradeGunPrice[0][z]=Case[z]
+    CaseSkinGradeGunPrice[1][z]=Skin[z]
+    CaseSkinGradeGunPrice[2][z]=Grade[z]
+    CaseSkinGradeGunPrice[3][z]=Gun[z]
+    CaseSkinGradeGunPrice[4][z]=Price[z]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
