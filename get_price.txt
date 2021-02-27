@@ -1,3 +1,7 @@
+#This program is a work in progress
+#The following imports data from csgostash.com with all the current prices for skins in the steam marketplace
+#The output is nicely formatted to be used with the program avg.py
+
 import requests
 import re
 import array as arr
